@@ -54,9 +54,12 @@ public class memoryCharacter : MonoBehaviour
 	
     void pressYes()
     {
-		Audio.PlaySoundAtTransform(SFX[0].name, transform);
 		yes.AddInteractionPunch(0.1f);
-        if (solved) return;
+        if (solved)
+		{
+			Audio.PlaySoundAtTransform(SFX[0].name, transform);
+			return;
+		}
 		
         if (usedIndices.Contains(curIndex))
         {
@@ -69,6 +72,7 @@ public class memoryCharacter : MonoBehaviour
 		
 		else
 		{
+			Audio.PlaySoundAtTransform(SFX[0].name, transform);
 			module.HandleStrike();
 			Debug.LogFormat("[Memory Character #{0}] Yes button incorrectly pressed. Strike! Also, a complete reset.", moduleId);
 			stageCounter = 0;
