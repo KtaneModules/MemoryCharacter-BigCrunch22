@@ -22,8 +22,6 @@ public class memoryCharacter : MonoBehaviour
     List<int> usedIndices = new List<int>();
     int curIndex, stageCounter = 0, forcedYes;
     bool solved;
-
-    // Use this for initialization
 	
 	void Awake()
 	{
@@ -38,7 +36,6 @@ public class memoryCharacter : MonoBehaviour
         forcedYes = weights.PickRandom();
         pickKanji(); 
     }
-	
 
 	void pickKanji()
 	{
@@ -60,7 +57,6 @@ public class memoryCharacter : MonoBehaviour
 			Audio.PlaySoundAtTransform(SFX[0].name, transform);
 			return;
 		}
-		
         if (usedIndices.Contains(curIndex))
         {
 			Audio.PlaySoundAtTransform(SFX[1].name, transform);
@@ -69,7 +65,6 @@ public class memoryCharacter : MonoBehaviour
             Debug.LogFormat("[Memory Character #{0}] Yes button correctly pressed. Module solved.", moduleId);
             usedIndices.Add(curIndex);
         }
-		
 		else
 		{
 			Audio.PlaySoundAtTransform(SFX[0].name, transform);
@@ -79,7 +74,6 @@ public class memoryCharacter : MonoBehaviour
 			usedIndices = new List<int>();
 			Start();
 		}
-        
     }
 	
     void pressNo()
@@ -87,7 +81,6 @@ public class memoryCharacter : MonoBehaviour
 		Audio.PlaySoundAtTransform(SFX[0].name, transform);
 		yes.AddInteractionPunch(0.1f);
         if (solved) return;
-		
         if (usedIndices.Contains(curIndex))
         {
             module.HandleStrike();
@@ -96,7 +89,6 @@ public class memoryCharacter : MonoBehaviour
 			usedIndices = new List<int>();
 			Start();
         }
-		
 		else
 		{
 			Debug.LogFormat("[Memory Character #{0}] No button correctly pressed.", moduleId);
@@ -107,19 +99,26 @@ public class memoryCharacter : MonoBehaviour
 	
 	//twitch plays
     #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"To press the yes/no button, use !{0} yes/no";
+    private readonly string TwitchHelpMessage = @"!{0} press yes/no [Presses the yes or no button.] | 'press' is optional. 'yes' and 'no' can be abbrevaited to 'y' or 'n'";
     #pragma warning restore 414
 	IEnumerator ProcessTwitchCommand(string command)
 	{
-		 if (Regex.IsMatch(command, @"^\s*yes\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
-        {
-            yield return null;
-            yes.OnInteract();
-        }
-        if (Regex.IsMatch(command, @"^\s*no\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
-        {
-            yield return null;
-            no.OnInteract();
-        }
+        var m = Regex.Match(command, @"^\s*(press\s+)?((?<yes>(yes|y))|(no|n))\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        if (!m.Success)
+            yield break;
+        yield return null;
+        var btn = m.Groups["yes"].Success ? yes : no;
+        btn.OnInteract();
 	}
+    
+    private IEnumerator TwitchHandleForcedSolve()
+    {
+        while (!solved)
+        {
+            var btn = usedIndices.Contains(curIndex) ? yes : no;
+            btn.OnInteract();
+            if (!solved)
+                yield return new WaitForSeconds(0.4f);
+        }
+    }
 }
