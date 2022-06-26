@@ -20,7 +20,7 @@ public class memoryCharacter : MonoBehaviour
     static int moduleIdCounter = 1;
     string kanji = "一二三四五六七八九十百千上下左右中大小月日年早木林山川土空田天生花草虫犬人名女男子目耳口手足見音力気円入出立休先夕本文字学校村町森正水火玉王石竹糸貝車金雨赤青白";
     List<int> usedIndices = new List<int>();
-    int curIndex, stageCounter = 0, forcedYes;
+    int curIndex, stageCounter = 0, forcedYes, TempNumber = -1;
     bool solved;
 	
 	void Awake()
@@ -32,18 +32,43 @@ public class memoryCharacter : MonoBehaviour
 	
 	void Start()
 	{
-        List<int> weights = new List<int>() {5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, };
-        forcedYes = weights.PickRandom();
+        forcedYes = rnd.Range(5,11);
+		int TempNumber2;
+		do
+		{
+			TempNumber2 = rnd.Range(0,4);
+		}
+		while(TempNumber2 == TempNumber);
+		TempNumber = TempNumber2;
+		switch(TempNumber)
+		{
+			case 0:
+				kanjiDisplay.color = new Color(255/255f, 0/255f, 0/255f);
+				break;
+			case 1:
+				kanjiDisplay.color = new Color(255/255f, 255/255f, 0/255f);
+				break;
+			case 2:
+				kanjiDisplay.color = new Color(0/255f, 255/255f, 0/255f);
+				break;
+			case 3:
+				kanjiDisplay.color = new Color(0/255f, 0/255f, 255/255f);
+				break;
+		}
         pickKanji(); 
     }
 
 	void pickKanji()
 	{
         stageCounter++;
-        if (forcedYes == stageCounter) curIndex = usedIndices.PickRandom();       
+        if (forcedYes == stageCounter) curIndex = usedIndices[rnd.Range(0, usedIndices.Count() - 1)];       
         else
         {
-            curIndex = rnd.Range(0, 80);
+			do
+			{
+				curIndex = rnd.Range(0, 80);
+			}
+			while(usedIndices.Contains(curIndex));
         }
         kanjiDisplay.text = kanji[curIndex].ToString();
         Debug.LogFormat("[Memory Character #{0}] Displayed character is {1}.", moduleId, kanji[curIndex]);
